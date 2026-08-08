@@ -485,14 +485,8 @@ class Inspector:
         if argspec.varkw:
             params.append(ParamDescription(name=argspec.varkw, kwargs=True))
 
-        kwonly_with_defaults: list[Any] = list(argspec.kwonlydefaults) if argspec.kwonlydefaults else []
-        kwonly_num_args_without_default = len(argspec.kwonlyargs) - len(kwonly_with_defaults)
-        kwonly_without_defaults: list[PydanticUndefinedType] = [
-            PydanticUndefined
-        ] * kwonly_num_args_without_default
-        kwonly_defaults = kwonly_without_defaults + kwonly_with_defaults
-
-        for kwonly_arg, kwonly_default in zip(argspec.kwonlyargs, kwonly_defaults, strict=True):
-            params.append(ParamDescription(name=kwonly_arg, default=kwonly_default))
+        for kwonly_arg in argspec.kwonlyargs:
+            default = argspec.kwonlydefaults.get(kwonly_arg, Unset) if argspec.kwonlydefaults else Unset
+            params.append(ParamDescription(name=kwonly_arg, default=default))
 
         return params
